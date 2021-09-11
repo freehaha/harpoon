@@ -119,14 +119,17 @@ local function expand_dir(config)
     return config
 end
 
-M.save = function()
-    log.trace("save(): Saving cache config to", cache_config)
-    Path:new(cache_config):write(vim.fn.json_encode(HarpoonConfig), "w")
-end
-
 local function read_config(local_config)
     log.trace("_read_config():", local_config)
     return vim.fn.json_decode(Path:new(local_config):read())
+end
+
+M.save = function()
+    log.trace("save(): Saving cache config to", cache_config)
+    local config = ensure_correct_config(read_config(cache_config))
+    local cwd = vim.loop.cwd()
+    config.projects[cwd] = HarpoonConfig.projects[cwd]
+    Path:new(cache_config):write(vim.fn.json_encode(config), "w")
 end
 
 -- 1. saved.  Where do we save?
